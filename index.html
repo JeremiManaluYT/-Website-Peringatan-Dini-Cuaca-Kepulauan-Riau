@@ -1,0 +1,2182 @@
+l<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Peringatan Dini Cuaca BMKG — Kepri
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="dns-prefetch" href="https://www.bmkg.go.id" />
+    <link rel="dns-prefetch" href="https://nowcasting.bmkg.go.id" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+  --accent:   #00E5FF;
+  --danger:   #ff453a;
+  --safe:     #34d399;
+  --warn:     #fbbf24;
+  --purple:   #a78bfa;
+
+  /* Golden Ratio (by Euclid, Pythagoras, Phidias, Leonardo Fibonacci, & Martin Ohm) Typography — base 15px × φ 1.618 */
+  --fs-xs:   9.27px;   /* 15 ÷ φ */
+  --fs-sm:   15px;
+  --fs-base: 15px;
+  --fs-md:   24.27px;  /* 15 × φ */
+  --fs-lg:   39.27px;  /* 24.27 × φ */
+  --fs-xl:   63.51px;  /* 39.27 × φ */
+
+  --r-main: 48px;
+  --r-pill: 100px;
+}
+
+html, body {
+  min-height: 100vh;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ── Info Row ── */
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+  }
+
+  .info-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    flex-shrink: 0;
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+
+/* ── Radial BG ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 10% 10%, #002b36 0%, #000 62%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Zoom Modal / Lightbox ── */
+  .zoom-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .zoom-modal.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .zoom-modal img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 20px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.8);
+    object-fit: contain;
+  }
+  .zoom-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    backdrop-filter: blur(20px);
+  }
+  .zoom-close:hover { background: rgba(255,255,255,0.2); }
+  .zoom-label-bar {
+    position: absolute;
+    bottom: 32px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    backdrop-filter: blur(20px);
+  }
+
+/* ── Easter Egg: iOS 26 Liquid Glass Animation ── */
+  .lg-burst {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .lg-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid rgba(0,229,255,0.6);
+    animation: lgExpand 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
+    box-shadow: 0 0 40px rgba(0,229,255,0.4), inset 0 0 40px rgba(0,229,255,0.1);
+  }
+
+  @keyframes lgExpand {
+    0%   { transform: scale(0) translate(-50%,-50%); opacity: 0.9; }
+    60%  { opacity: 0.6; }
+    100% { transform: scale(8) translate(-50%,-50%); opacity: 0; }
+  }
+
+  .lg-blob {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.35) 0%, rgba(0,180,255,0.15) 50%, transparent 70%);
+    filter: blur(2px);
+    animation: lgBlob 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+
+  @keyframes lgBlob {
+    0%   { transform: scale(0) translate(-50%,-50%); opacity: 1; }
+    70%  { opacity: 0.6; }
+    100% { transform: scale(5) translate(-50%,-50%); opacity: 0; }
+  }
+
+  .lg-sparkle {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: lgSparkle 0.8s ease-out forwards;
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  @keyframes lgSparkle {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: var(--tx, translate(60px,-60px)) scale(0); opacity: 0; }
+  }
+
+  .lg-flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--fx) var(--fy), rgba(0,229,255,0.18) 0%, transparent 60%);
+    animation: lgFlash 0.6s ease-out forwards;
+  }
+  @keyframes lgFlash {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+/* ── Layout ── */
+.wrapper {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1px 14px 14px;
+}
+.app {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Header ── */
+.hdr {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 4px;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.hdr-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.hdr-month {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  line-height: 1;
+}
+.hdr-region {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(0,229,255,.45);
+  line-height: 1;
+}
+.hdr-center {
+  text-align: center;
+}
+.hdr-title {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: #fff;
+  line-height: 1;
+  white-space: nowrap;
+}
+.hdr-title em {
+  color: var(--accent);
+  font-style: normal;
+}
+.hdr-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Status Pill ── */
+.spill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--r-pill);
+  padding: 5px 10px 5px 7px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 2px 16px rgba(0,0,0,.38), 0 1px 0 rgba(255,255,255,.07) inset;
+}
+.sdot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background .4s, box-shadow .4s;
+}
+.stxt {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.68);
+  white-space: nowrap;
+}
+
+/* ── Main Glass Card ── */
+.glass-card {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  border-radius: var(--r-main);
+  border: 1px solid rgba(255,255,255,0.13);
+  padding: 46px 38px 36px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.18) inset,
+    0 -1px 0 rgba(0,0,0,0.5) inset,
+    0 12px 120px rgba(0,229,255,0.09),
+    0 48px 120px rgba(0,0,0,0.65),
+    0 6px 40px rgba(0,0,0,0.5);
+  transition: box-shadow .5s ease;
+}
+/* Top gloss */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.3) 35%, rgba(0,229,255,.45) 60%, rgba(255,255,255,.15) 82%, transparent 100%);
+  pointer-events: none;
+}
+/* Inner specular */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-main);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.06) 0%, transparent 38%),
+    radial-gradient(ellipse at 82% 0%, rgba(0,229,255,0.08) 0%, transparent 55%);
+  pointer-events: none;
+}
+.glass-card.w-glow {
+  box-shadow:
+    0 0 0 1px rgba(255,69,58,0.1) inset,
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 -1px 0 rgba(0,0,0,0.45) inset,
+    0 8px 80px rgba(255,69,58,0.13),
+    0 40px 100px rgba(0,0,0,0.62),
+    0 4px 32px rgba(0,0,0,0.5);
+}
+.glass-card.w-glow::before {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,100,90,.22) 35%, rgba(255,69,58,.42) 60%, rgba(255,100,90,.16) 82%, transparent 100%);
+}
+.card-orb {
+  position: absolute;
+  top: -85px; right: -60px;
+  width: 370px; height: 370px;
+  background: radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 65%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* ── Station Banner ── */
+.sta-banner {
+  background: rgba(0,229,255,0.05);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 30px;
+  padding: 20px 22px;
+  margin-bottom: 26px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  box-shadow:
+    0 0 0 1px rgba(0,229,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.08) inset,
+    0 6px 32px rgba(0,229,255,0.08),
+    0 2px 16px rgba(0,0,0,0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.sta-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,229,255,0.5), transparent);
+}
+.sta-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: linear-gradient(138deg, rgba(255,255,255,0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+.sta-icon {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0,229,255,0.18) 0%, rgba(0,229,255,0.06) 100%);
+  border: 1px solid rgba(0,229,255,0.28);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 21px;
+  box-shadow: 0 3px 16px rgba(0,229,255,0.18), 0 1px 0 rgba(255,255,255,0.1) inset;
+  z-index: 1;
+}
+.sta-info { flex: 1; min-width: 0; z-index: 1; }
+.sta-name {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -.01em;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.sta-sub {
+  font-size: var(--fs-xs);
+  color: rgba(255,255,255,.4);
+  font-weight: 500;
+  letter-spacing: .02em;
+  line-height: 1.5;
+}
+.sta-code {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: rgba(0,229,255,.68);
+  letter-spacing: .13em;
+  background: rgba(0,229,255,0.1);
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 7px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,229,255,0.1);
+  z-index: 1;
+}
+
+/* ── Weather Pills ── */
+.pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 13px;
+}
+.wpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  border-radius: 100px;
+  padding: 5px 10px;
+  border: 1px solid;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  line-height: 1;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.wpill::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 48%;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px 100px 0 0;
+  pointer-events: none;
+}
+.p-danger  { background: rgba(255,69,58,0.14);    border-color: rgba(255,69,58,0.38);    color: #ff7b72; box-shadow: 0 0 14px rgba(255,69,58,0.22),  0 2px 8px rgba(0,0,0,.3); }
+.p-warn    { background: rgba(251,191,36,0.13);   border-color: rgba(251,191,36,0.35);   color: #fcd34d; box-shadow: 0 0 12px rgba(251,191,36,0.18), 0 2px 8px rgba(0,0,0,.3); }
+.p-info    { background: rgba(0,229,255,0.10);    border-color: rgba(0,229,255,0.3);     color: var(--accent); box-shadow: 0 0 14px rgba(0,229,255,0.14), 0 2px 8px rgba(0,0,0,.3); }
+.p-rain    { background: rgba(96,165,250,0.13);   border-color: rgba(96,165,250,0.32);   color: #93c5fd; box-shadow: 0 0 12px rgba(96,165,250,0.14), 0 2px 8px rgba(0,0,0,.3); }
+.p-lrain   { background: rgba(147,197,253,0.10);  border-color: rgba(147,197,253,0.25);  color: #bfdbfe; box-shadow: 0 0 10px rgba(147,197,253,0.12), 0 2px 8px rgba(0,0,0,.3); }
+.p-storm   { background: rgba(167,139,250,0.13);  border-color: rgba(167,139,250,0.3);   color: #c4b5fd; box-shadow: 0 0 14px rgba(167,139,250,0.18), 0 2px 8px rgba(0,0,0,.3); }
+.p-safe    { background: rgba(52,211,153,0.11);   border-color: rgba(52,211,153,0.3);    color: #6ee7b7; box-shadow: 0 0 12px rgba(52,211,153,0.15), 0 2px 8px rgba(0,0,0,.3); }
+.p-wind    { background: rgba(251,191,36,0.10);   border-color: rgba(251,191,36,0.28);   color: #fde68a; box-shadow: 0 0 10px rgba(251,191,36,0.12), 0 2px 8px rgba(0,0,0,.3); }
+.p-wave    { background: rgba(0,229,255,0.09);    border-color: rgba(0,229,255,0.25);    color: #67e8f9; box-shadow: 0 0 10px rgba(0,229,255,0.12),   0 2px 8px rgba(0,0,0,.3); }
+.p-fog     { background: rgba(200,200,220,0.09);  border-color: rgba(200,200,220,0.22);  color: #cbd5e1; box-shadow: 0 0 10px rgba(200,200,220,0.1),  0 2px 8px rgba(0,0,0,.3); }
+
+/* ── Card content typography ── */
+.warn-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.22);
+  display: block;
+  margin-bottom: 6px;
+}
+.warn-title {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -.045em;
+  line-height: .97;
+  margin-bottom: 10px;
+}
+.warn-subtitle {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: rgba(255,255,255,.55);
+  margin-bottom: 9px;
+  line-height: 1.3;
+}
+.desc-text {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: rgba(255,255,255,.52);
+  line-height: 1.72;
+  margin-bottom: 16px;
+}
+.desc-scroll {
+  max-height: 135px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.desc-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Divider ── */
+.div-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent);
+  margin: 14px 0;
+}
+
+/* scan line */
+.scan-line {
+  position: absolute;
+  top: -5%;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 5%, rgba(0,229,255,0.12) 50%, transparent 95%);
+  animation: scanDown 5s linear infinite;
+  pointer-events: none;
+  z-index: 3;
+  will-change: top;
+}
+@keyframes scanDown {
+  0% { top: -5%; } 100% { top: 105%; }
+}
+
+/* ── ANIMATED BACKGROUND BLOBS ── */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(130px);
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
+body::before {
+  width: 680px; height: 680px;
+  background: #00E5FF;
+  top: -140px; left: -140px;
+  animation: blobFloat 12s ease-in-out infinite alternate;
+  will-change: transform;
+}
+body::after {
+  width: 580px; height: 580px;
+  background: #0088aa;
+  bottom: -120px; right: -120px;
+  animation: blobFloat 15s ease-in-out infinite alternate-reverse;
+  will-change: transform;
+}
+@keyframes blobFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(60px, 40px) scale(1.15); }
+}
+
+/* ── Infografis ── */
+.infografis-wrap {
+  border-radius: 17px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.35);
+  margin-bottom: 12px;
+  position: relative;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.05) inset;
+}
+.infografis-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+.infografis-img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 260px;
+}
+.infografis-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 22px 12px 10px;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  z-index: 2;
+}
+.infografis-lbl {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  color: rgba(255,255,255,.42);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ── Infografis Map Section ── */
+  .map-section {
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .map-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .map-zoom-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 100px;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+  }
+  .map-zoom-btn:hover {
+    background: rgba(0,229,255,0.15);
+    transform: scale(1.03);
+  }
+
+  .map-container {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.12);
+    aspect-ratio: 16/10;
+    cursor: pointer;
+  }
+
+  .map-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .map-container:hover img { transform: scale(1.02); }
+
+  .map-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .map-hidden-safe {
+    background: rgba(0,229,255,0.02) !important;
+    border: 1px dashed rgba(0,229,255,0.08) !important;
+  }
+
+  .map-safe-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: rgba(0,229,255,0.25);
+    user-select: none;
+  }
+
+  .map-error-state {
+    width: 100%;
+    aspect-ratio: 16/10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.08);
+    border-radius: 20px;
+    color: var(--text-tertiary);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+ } 
+
+/* ── CTA Buttons ── */
+.cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: 100%;
+    padding: 19px 28px;
+    border-radius: 22px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .cta-btn:active { transform: scale(0.96); }
+
+  .cta-btn.primary {
+    background: linear-gradient(135deg, var(--accent) 0%, #00b8cc 100%);
+    color: #000;
+    box-shadow: 0 8px 32px rgba(0,229,255,0.35), 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .cta-btn.primary:hover {
+    box-shadow: 0 12px 40px rgba(0,229,255,0.5), 0 4px 12px rgba(0,0,0,0.3);
+    transform: translateY(-1px);
+  }
+
+  .cta-btn.danger {
+    background: linear-gradient(135deg, var(--red) 0%, #cc2a1f 100%);
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(255,69,58,0.35), 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .cta-btn.ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: var(--text-primary);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    margin-top: 10px;
+  }
+
+.btn-danger {
+  background: linear-gradient(145deg, rgba(255,69,58,0.2) 0%, rgba(255,69,58,0.07) 100%);
+  border-color: rgba(255,69,58,0.42);
+  color: #ff7b72;
+  box-shadow: 0 5px 28px rgba(255,69,58,0.22), 0 1px 0 rgba(255,255,255,0.07) inset;
+}
+.btn-accent {
+  background: linear-gradient(145deg, rgba(0,229,255,0.16) 0%, rgba(0,229,255,0.05) 100%);
+  border-color: rgba(0,229,255,0.38);
+  color: var(--accent);
+  box-shadow: 0 5px 28px rgba(0,229,255,0.17), 0 1px 0 rgba(255,255,255,0.07) inset;
+}
+.btn-error {
+  background: linear-gradient(145deg, rgba(255,69,58,0.18) 0%, rgba(255,69,58,0.06) 100%);
+  border-color: rgba(255,69,58,0.4);
+  color: #ff7b72;
+  box-shadow: 0 5px 28px rgba(255,69,58,0.18), 0 1px 0 rgba(255,255,255,0.07) inset;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.btn-row .cta-btn { 
+  flex: 1; 
+}
+
+/* ── Meta info ── */
+.meta-info {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.18);
+  line-height: 1.8;
+}
+.meta-info .hi {
+  color: rgba(255,255,255,.32);
+}
+
+/* ── Loading ── */
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 0 16px;
+  gap: 11px;
+}
+.loading-icon {
+  font-size: 28px;
+  animation: spinPulse 2.5s ease-in-out infinite;
+}
+@keyframes spinPulse {
+  0%,100% { opacity:.2;  transform: scale(0.9)  rotate(-10deg); }
+  50%     { opacity:.65; transform: scale(1.05) rotate(10deg);  }
+}
+.loading-text {
+  font-size: 24px;
+  font-weight: 550;
+  color: rgba(255, 255, 255, 0.32);
+  letter-spacing: -.025em;
+  display: inline-block !important;
+  white-space: nowrap !important;
+  width: max-content !important;
+  max-width: none !important;
+  word-break: keep-all !important;
+}
+
+/* ── Dot animations ── */
+@keyframes glowC {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,229,255,.75); }
+  50%     { box-shadow: 0 0 0 4px rgba(0,229,255,0); }
+}
+@keyframes glowR {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,69,58,.85); }
+  50%     { box-shadow: 0 0 0 4px rgba(255,69,58,0); }
+}
+.dot-live   { animation: glowC 1.6s ease-in-out infinite; }
+.dot-danger { animation: glowR 1.1s ease-in-out infinite; }
+
+/* ── Refresh indicator ── */
+.refresh-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.4);
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 100px;
+  margin-top: 2px;
+}
+.refresh-icon { font-size: 10px; animation: spin 4s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* --- PREMIUM LIQUID GLASS FOOTER STYLING --- */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* CRITICAL HEIGHT & PADDING */
+  height: 76px;
+  padding: 0 38px;
+  box-sizing: border-box;
+
+  /* THE ANTIDOTE: Lift the entire footer up by 16px to clear the screen edge */
+  margin-bottom: 16px;
+
+  /* Safe width adjustment so it doesn't stretch ugly after adding margin */
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+
+  /* Premium frosted translucent styling */
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+
+  /* Premium FULL CORNER frame */
+  border-radius: 27px;
+
+  /* Specular rim lighting outlines on all sides */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  /* System typography specifications */
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 50;
+  letter-spacing: 0.4px;
+  text-align: center;
+
+  /* Layout depth shadow */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+
+  /* Interaction controls */
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Interactivity signature */
+.footer:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #00e6ff; /* Cyan teal glow */
+  transform: translateY(-2px); /* Subtle physical lift on hover */
+}
+
+/* ── Image Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+.modal-content {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+.modal-close {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  font-size: 42px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 300;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 10;
+  transition: color 0.2s, transform 0.2s;
+}
+.modal-close:hover {
+  color: var(--danger);
+  transform: scale(1.1);
+}
+
+/* Small box design to keep the information layout neat and visually appealing */
+.info-box {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 450px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+ .waktu-terbit {
+  font-size: 14px;
+  color: #333333;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+  .kredit-bmkg {
+  font-size: 11px;
+  color: #777777;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-top: 1px dashed #cccccc;
+  padding-top: 8px;
+  margin-top: 8px;
+}
+        
+/* --- UNIFIED TEAL LIQUID GLASS MODAL STYLING (THEMED) --- */
+
+
+/* Unified Teal Glowing Blobs behind the glass card */
+.liquid-blob-1, .liquid-blob-2 {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 1;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.liquid-blob-1 {
+  background: radial-gradient(circle, rgba(0, 230, 255, 0.8) 0%, rgba(0, 180, 255, 0.5) 100%); /* Primary Cyan accent blob */
+  top: 15%;
+  left: 20%;
+  animation: liquidFloat 10s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.liquid-blob-2 {
+  background: radial-gradient(circle, rgba(0, 168, 150, 0.8) 0%, rgba(0, 120, 100, 0.5) 100%); /* Depth Teal accent blob */
+  bottom: 15%;
+  right: 20%;
+  animation: liquidFloat 10s ease-in-out infinite alternate-reverse 2s;
+  will-change: transform;
+}
+
+/* Crisp dark system close button on dark card */
+.close-modal-btn {
+  color: #fff;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1); /* Muted button base */
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+.close-modal-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.08);
+}
+
+/* Typography inside Glass */
+.modal-box h3 {
+  margin-top: 0;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  color: #fff; /* Bright white title */
+  margin-bottom: 8px;
+}
+
+.modal-box p {
+  font-size: 15px;
+  line-height: 1.52;
+  color: rgba(255, 255, 255, 0.7); /* Slightly muted system white */
+  margin-bottom: 22px;
+}
+
+/* Credits Items Structured Cleanly */
+.credits-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.credits-list li {
+  font-size: 14px;
+  padding: 16px 18px;
+  margin-bottom: 11px;
+  background: rgba(255, 255, 255, 0.08); /* Transparent layered glass items */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.credits-list li strong {
+  color: #fff; /* Bright white primary provider */
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.credits-list li span {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.6); /* Muted system white details */
+  margin-top: 2px;
+}
+
+/* Fluid Keyframes Animations */
+@keyframes iosFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes iosScaleUp {
+  from { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes liquidFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(35px, -45px) scale(1.15); }
+}
+
+/* --- MAPS SELECTOR MODAL & ACTION SHEET STYLING --- */
+
+/* LIQUID BLUR OVERLAY */
+
+.maps-modal-overlay, .credit-modal {
+  display: none;
+  position: fixed;
+  z-index: 10005;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  
+  background-color: rgba(3, 8, 16, 0.75); 
+  
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  animation: iosFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Flexbox configuration pushes content to the bottom on mobile devices */
+  display: none; /* Controlled via JS switching to 'flex' */
+  flex-direction: column;
+  justify-content: flex-end; /* Snaps perfectly to mobile bottom */
+  align-items: center;
+}
+
+/* --- CREDIT MODAL --- */
+
+.credit-modal {
+  display: none; 
+  position: fixed; 
+  z-index: 10000; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  background-color: rgba(4, 10, 24, 0.65); 
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  
+  /* CRITICAL FONT FIX: Forces the use of a modern premium Sans-Serif font family */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  animation: iosFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-box {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 620px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 40px;
+  border-radius: 34px;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    inset 0 1.5px 0px rgba(255, 255, 255, 0.3),
+    0 20px 50px rgba(0, 0, 0, 0.4);
+  color: #fff;
+  
+  /* Ensures the container box passes down the modern sans-serif font to all child elements */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  animation: iosScaleUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Polishes the heading/title elements inside the modal */
+.modal-box h2, .modal-box .modal-title {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* Polishes the description text, lists, and wrapper divs inside the modal */
+.modal-box p, .modal-box span, .modal-box div {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: 0.1px;
+}
+
+
+/* Fluid Action Sheet Responsive Container */
+.maps-action-sheet {
+  width: 100%;
+  max-width: 540px;
+  background: rgba(255, 255, 255, 0.12); /* High-fidelity frosted translucent white */
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  
+  /* continuous smooth corner styling for iOS bottom sheets */
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); /* Dynamic spacing to clear device safe home-indicator bar */
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  animation: iosSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Desktop & Tablet Optimization (Auto shifts center if screen size expands) */
+@media (min-width: 500px) {
+  .maps-modal-overlay {
+    justify-content: center; /* Centers layout on wider desktop displays */
+    padding: 20px;
+  }
+  .maps-action-sheet {
+    border-radius: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    margin-bottom: 0;
+    animation: iosDesktopPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+}
+
+/* Core Animations Specs */
+@keyframes iosSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes iosDesktopPop {
+  from { transform: scale(0.9) translateY(10px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Fluid Action Sheet Pop Up Box */
+.maps-action-sheet {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  width: 92%;
+  max-width: 540px;
+  background: rgba(255, 255, 255, 0.12); /* Semi-transparent ultra glass */
+  backdrop-filter: blur(55px) saturate(210%);
+  -webkit-backdrop-filter: blur(35px) saturate(210%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  padding: 24px 20px;
+  box-shadow: 
+    inset 0 1px 0px rgba(255, 255, 255, 0.4),
+    0 20px 50px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  box-sizing: border-box;
+  animation: iosSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Header Description Inside Sheet */
+.maps-modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.maps-modal-header h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+.maps-modal-header p {
+  margin: 4px 0 0 0;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Navigation Selection Layout */
+.maps-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto; /* Scrollable list if many map options exist */
+  padding-right: 4px;
+}
+
+/* Premium Scrollbar for iOS feel */
+.maps-options-grid::-webkit-scrollbar {
+  width: 4px;
+}
+.maps-options-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+/* Individual Selection Options */
+.map-option-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  text-decoration: none;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.map-option-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 230, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.map-option-item:hover span {
+  color: #00e6ff; /* Highlighting text on choice hover */
+}
+
+/* App icon graphic placeholders */
+.map-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.map-option-item span {
+  font-size: 14.5px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+/* High-contrast system dismiss button */
+.maps-cancel-btn {
+  width: 100%;
+  padding: 13px;
+  margin-top: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.maps-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Trigger button signature style */
+.maps-coordinates-trigger {
+  color: #00e6ff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.maps-coordinates-trigger:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Animation Specifications */
+@keyframes iosSlideUp {
+  from { transform: translate(-50%, 30px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+
+/* --- CREDITS LIST & CLICKABLE LINK STYLING --- */
+.credits-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.credits-list li {
+  margin-bottom: 11px;
+  background: rgba(255, 255, 255, 0.08); /* Transparent layered glass items */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Elegant iOS-style lift effect when hovering over the card item */
+.credits-list li:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(0, 230, 255, 0.5); /* Glowing cyan border outline on hover */
+  transform: translateY(-2px);
+}
+
+/* Reset standard anchor tag styles inside the credits list */
+.credit-link {
+  text-decoration: none;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.credit-link strong {
+  color: #fff; /* Bright white primary provider text */
+  font-weight: 700;
+  font-size: 15px;
+  transition: color 0.2s ease;
+}
+
+/* Turns the header text into a beautiful Cyan Teal upon interaction */
+.credits-list li:hover .credit-link strong {
+  color: #00e6ff; 
+}
+
+.credit-link span {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.6); /* Muted system white details */
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <div class="zoom-modal" id="zoomModal">
+      <div class="zoom-close" onclick="closeZoom()">
+        ✕
+      </div>
+      <img id="zoomImg" src="" alt="Infografis Cuaca Kepri" />
+      <div class="zoom-label-bar" id="zoomLabel">
+        INFOGRAFIS CUACA — BMKG STASIUN KEP. RIAU
+      </div>
+    </div>
+    <div class="lg-burst" id="lgBurst">
+    </div>
+    <div class="wrapper">
+      <div class="app">
+        <div class="hdr">
+          <div class="hdr-left">
+            <span class="hdr-month" id="monthYear">            2026
+</span>
+            <span class="hdr-region">            Kepulauan Riau
+</span>
+          </div>
+          <div class="hdr-center">
+            <h1 class="hdr-title">
+              Peringatan
+              <em>              Dini
+</em>
+            </h1>
+          </div>
+          <div class="hdr-right">
+            <div class="spill">
+              <span class="sdot" id="sdot" style="background:#555;"></span>
+              <span class="stxt" id="stxt">MEMULAI...</span>
+            </div>
+          </div>
+        </div>
+        <div class="glass-card" id="mainCard">
+          <div class="card-orb">
+          </div>
+          <div class="sta-banner">
+            <div class="sta-icon">
+              🛰️
+            </div>
+            <div class="sta-info">
+              <div class="sta-name">
+                Stasiun Meteorologi Hang Nadim
+              </div>
+              <div class="sta-sub">
+                Batam, Kepulauan Riau ·
+                <span id="trigger-maps-menu" class="maps-coordinates-trigger">                01°07' LU, 104°06' BT
+</span>
+              </div>
+            </div>
+            <div class="sta-code">
+              WS CKR
+            </div>
+          </div>
+          <div id="maps-selector-modal" class="maps-modal-overlay">
+            <div class="maps-action-sheet">
+              <div class="maps-modal-header">
+                <h4>
+                  Buka di Peta
+                </h4>
+                <p>
+                  Pilih aplikasi navigasi yang Anda gunakan
+                </p>
+              </div>
+              <div class="maps-options-grid">
+                <a href="https://maps.google.com/?q=0.916667,104.116667" target="_blank" class="map-option-item">                <div class="map-icon-wrapper" style="background: #ea4335;">
+                  🗺️
+                </div>
+                <span>                Google Maps
+</span>
+</a>
+                <a href="https://maps.apple.com/?q=0.916667,104.116667" target="_blank" class="map-option-item">                <div class="map-icon-wrapper" style="background: #1e88e5;">
+                  🍎
+                </div>
+                <span>                Apple Maps
+</span>
+</a>
+                <a href="https://waze.com/ul?ll=0.916667,104.116667&navigate=yes" target="_blank" class="map-option-item">                <div class="map-icon-wrapper" style="background: #33ccff;">
+                  🚙
+                </div>
+                <span>                Waze Navigation
+</span>
+</a>
+                <a href="https://www.bing.com/maps?ss=ypid.YN7214BB8C518D8844" target="_blank" class="map-option-item">                <div class="map-icon-wrapper" style="background: #00809d;">
+                  🌐
+                </div>
+                <span>                Bing Maps
+</span>
+</a>
+                <a href="https://id.maptons.com/p/5926493793" target="_blank" class="map-option-item">                <div class="map-icon-wrapper" style="background: #ff5722;">
+                  📍
+                </div>
+                <span>                Maptons
+</span>
+</a>
+                <a href="https://www.openstreetmap.org/way/60754286" target="_blank" class="map-option-item">                <div class="map-icon-wrapper" style="background: #7fc97f;">
+                  🗺️
+                </div>
+                <span>                OpenStreetMap
+</span>
+</a>
+              </div>
+              <button id="close-maps-menu" class="maps-cancel-btn">
+                Tutup
+              </button>
+            </div>
+          </div>
+          <div id="dc">
+            <div class="scan-line">
+            </div>
+            <div class="sync-bar" id="syncBar">
+            </div>
+            <div class="refresh-timer" id="refreshTimer">
+            </div>
+            <div class="loading-wrap">
+              <div class="loading-icon">
+                🛰️
+              </div>
+              <div class="loading-text">
+                Sinkronisasi...
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;">
+          <div class="refresh-chip">
+            <span class="refresh-icon">            ↻
+</span>
+            <span id="refreshChipText">            MENYINKRONKAN DATA...
+</span>
+          </div>
+        </div>
+        <div class="footer" id="trigger-credit-modal" style="cursor: pointer; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);" onmouseover="this.style.transform='scale(0.99)'" onmouseout="this.style.transform='scale(1)'">
+          © Badan Meteorologi, Klimatologi, dan Geofisika Indonesia
+        </div>
+        <div id="thankyou-modal" class="credit-modal">
+          <div class="liquid-blob-1">
+          </div>
+          <div class="liquid-blob-2">
+          </div>
+          <div class="modal-box">
+            <span class="close-modal-btn" id="close-credit-modal">            ✕
+</span>
+            <h3>
+              Data Providers & Credits
+            </h3>
+            <p>
+              Aplikasi ini didukung oleh platform resmi dan layanan data berikut:
+            </p>
+            <ul class="credits-list">
+              <li>
+                <a href="https://www.bmkg.go.id" target="_blank" class="credit-link">                <strong>                BMKG Nowcast API
+</strong>
+                <span>                Sumber data resmi peringatan dini cuaca dan nowcasting BMKG.
+</span>
+</a>
+              </li>
+              <li>
+                <a href="https://fonts.google.com" target="_blank" class="credit-link">                <strong>                Google Fonts & Icons
+</strong>
+                <span>                Layanan tipografi web dan aset antarmuka dari Google.
+</span>
+</a>
+              </li>
+              <li>
+                <a href="https://allorigins.win" target="_blank" class="credit-link">                <strong>                Public Data Proxies
+</strong>
+                <span>                Layanan proxy untuk pengambilan data dari berbagai sumber.
+</span>
+</a>
+              </li>
+            </ul>
+            <p style="font-size: 11px; color: rgba(255, 255, 255, 0.3); margin-top: 22px; text-align: center; margin-bottom: 0; font-weight: 300; letter-spacing: 0.5px;">
+              Terima kasih yang sebesar-besarnya kepada seluruh penyedia data dan aset kami.
+            </p>
+          </div>
+        </div>
+      </div>
+      <script>
+        /* ══════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════ */
+const RSS       = 'https://www.bmkg.go.id/alerts/nowcast/id/rss.xml';
+const INFOGRAFIS = 'https://nowcasting.bmkg.go.id/infografis/CKR/2026/05/16/infografis.jpg';
+const PROXIES   = [
+  { url: '/api/bmkg',                                    json: false, raw: true  },
+  { url: 'https://corsproxy.io/?',                       json: false },
+  { url: 'https://api.allorigins.win/get?url=',          json: true  },
+  { url: 'https://thingproxy.freeboard.io/fetch/',       json: false }
+];
+const FETCH_TIMEOUT_MS = 14000;
+
+function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal })
+    .then(res => { clearTimeout(timer); return res; })
+    .catch(err => { clearTimeout(timer); throw err; });
+}
+
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni',
+               'Juli','Agustus','September','Oktober','November','Desember'];
+(function() {
+  const n = new Date();
+  document.getElementById('monthYear').textContent =
+    BULAN[n.getMonth()] + ' ' + n.getFullYear();
+})();
+
+function setStatus(type, text) {
+  const dot = document.getElementById('sdot');
+  const txt = document.getElementById('stxt');
+  txt.textContent = text;
+  dot.className = 'sdot';
+  const cfg = {
+    loading: ['#555',       'none',                             ''],
+    live:    ['#00E5FF',    '0 0 8px 2px rgba(0,229,255,.75)', 'dot-live'],
+    standby: ['#00E5FF',    '0 0 6px 2px rgba(0,229,255,.55)', 'dot-live'],
+    error:   ['#ff453a',    '0 0 8px 2px rgba(255,69,58,.82)', 'dot-danger']
+  }[type] || ['#555','none',''];
+  dot.style.background = cfg[0];
+  dot.style.boxShadow  = cfg[1];
+  if (cfg[2]) dot.classList.add(cfg[2]);
+}
+
+function nowHHMM() {
+  const n = new Date();
+  return String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+
+function translateDate(dateStr) {
+    // Return a dash fallback if the date string is empty or undefined
+    if (!dateStr) return '—';
+
+    // Mapping dictionary to translate English short day names to full Indonesian days
+    const daysIndo = {
+        'Sun': 'Minggu', 'Mon': 'Senin', 'Tue': 'Selasa',
+        'Wed': 'Rabu', 'Thu': 'Kamis', 'Fri': 'Jumat', 'Sat': 'Sabtu'
+    };
+
+    // Mapping dictionary to convert short month names to full Indonesian month names
+    const monthsIndo = {
+        'Jan': 'Januari', 'Feb': 'Februari', 'Mar': 'Maret', 'Apr': 'April',
+        'May': 'Mei', 'Mei': 'Mei', 'Jun': 'Juni', 'Jul': 'Juli',
+        'Aug': 'Agustus', 'Sep': 'September', 'Oct': 'Oktober', 'Nov': 'November', 'Dec': 'Desember'
+    };
+
+    // Split the input string by any whitespace to eliminate irregular spacing issues
+    // Expected split array format: ["Sun,", "17", "Mei", "2026", "04:15:37", "+0000"]
+    const parts = dateStr.trim().split(/\s+/);
+    
+    // Fallback safety check: if the format is unexpected, return the original string
+    if (parts.length < 5) return dateStr;
+
+    // Extract the day name and strip away the trailing comma (e.g., "Sun," -> "Sun")
+    const dayEnglish = parts[0].replace(',', '');
+    const dayResult = daysIndo[dayEnglish] || dayEnglish;
+
+    // Extract standard date components
+    const dateNum = parts[1];
+    const monthEnglish = parts[2];
+    const monthResult = monthsIndo[monthEnglish] || monthEnglish;
+    const yearNum = parts[3];
+    const rawTime = parts[4];
+
+    // --- TIMEZONE CONVERSION: UTC (+0000) TO WIB (+0700) ---
+    // Extract hours, minutes, and seconds from the time segment
+    const timeParts = rawTime.split(':');
+    if (timeParts.length === 3) {
+        let hours = parseInt(timeParts[0], 10);
+        const minutes = timeParts[1];
+        const seconds = timeParts[2];
+
+        // Add 7 hours to shift from UTC to WIB timezone
+        hours = hours + 7;
+
+        // If hours exceed 23, wrap it around to match a 24-hour clock cycle
+        if (hours >= 24) {
+            hours = hours - 24;
+        }
+
+        // Pad single-digit hours with a leading zero (e.g., 4 becomes "04")
+        const formattedHours = hours.toString().padStart(2, '0');
+        const finalWIBTime = `${formattedHours}:${minutes}:${seconds}`;
+
+        // Construct and return the fully polished, properly spaced Indonesian standard date string
+        return `${dayResult}, ${dateNum} ${monthResult} ${yearNum} ${finalWIBTime} WIB`;
+    }
+
+    // Secondary fallback in case time parsing fails
+    return dateStr;
+}
+
+  
+// Build today's infografis URL for Kepri (CKR station)
+  function buildInfografisUrl() {
+    const now = new Date();
+    const y   = now.getFullYear();
+    const m   = String(now.getMonth()+1).padStart(2,'0');
+    const d   = String(now.getDate()).padStart(2,'0');
+    return `https://nowcasting.bmkg.go.id/infografis/CKR/${y}/${m}/${d}/infografis.jpg`;
+  }  
+
+function buildPills(raw) {
+  const lo = (raw || '').toLowerCase();
+  let out = '';
+
+  if (lo.includes('cuaca ekstrim') || lo.includes('ekstrim')) out += pill('p-danger', '⚡ Cuaca Ekstrim');
+  if (raw.includes('📡') || lo.includes('citra satelit')) out += pill('p-info', '📡 Citra Satelit');
+  if (raw.includes('⚠️') || lo.includes('waspada')) out += pill('p-warn', '⚠️ Waspada');
+
+  const hasLebat  = lo.includes('hujan lebat')  || raw.includes('☔') || raw.includes('🌧');
+  const hasPetir  = lo.includes('petir')        || raw.includes('⚡') || raw.includes('⛈');
+  const hasRingan = lo.includes('hujan ringan') || raw.includes('💧');
+  const hasStorm  = raw.includes('⛈') || (hasLebat && hasPetir);
+
+  if (hasStorm) {
+    out += pill('p-storm', '⛈️ Hujan Lebat & Petir');
+  } else {
+    if (hasLebat) out += pill('p-rain',   '🌧️ Hujan Lebat');
+    if (hasPetir) out += pill('p-danger', '⚡ Petir');
+  }
+  if (hasRingan) out += pill('p-lrain', '☁️💧 Hujan Ringan');
+  if (lo.includes('angin kencang') || (lo.includes('angin') && lo.includes('kencang'))) out += pill('p-wind', '💨 Angin Kencang');
+  if (lo.includes('gelombang')) out += pill('p-wave', '🌊 Gelombang Tinggi');
+  if (lo.includes('kabut'))     out += pill('p-fog',  '🌫️ Kabut');
+  if (lo.includes('panas terik') || lo.includes('terik')) out += pill('p-warn', '☀️ Panas Terik');
+
+  if (!out) out = pill('p-info', '📡 Citra Satelit');
+  return '<div class="pills-row">' + out + '</div>';
+}
+
+function pill(cls, label) {
+  return '<span class="wpill ' + cls + '">' + label + '</span>';
+}
+
+function renderLoading() {
+  setStatus('loading', 'MENGHUBUNGKAN...');
+  document.getElementById('refreshChipText').textContent = 'MENYINKRONKAN DATA...';
+  document.getElementById('mainCard').classList.remove('w-glow');
+  document.getElementById('dc').innerHTML =
+    '<div class="loading-wrap">' +
+      '<div class="scan-line"></div>' +
+      '<div class="sync-bar" id="syncBar"></div>' +
+      '<div class="refresh-timer" id="refreshTimer"></div>' +
+      '<div class="loading-icon">🛰️</div>' +
+      '<div class="loading-text">Sinkronisasi...</div>' +
+    '</div>';
+}
+
+function renderWarning(title, desc, link, lastBuild) {
+  setStatus('live', 'LIVE: ' + nowHHMM());
+  document.getElementById('refreshChipText').textContent = `DIPERBARUI ${nowHHMM()} WIB`;
+  
+  const infUrl  = buildInfografisUrl();
+  infografisUrl = infUrl;
+  zoomImgUrl    = infUrl;
+  
+  document.getElementById('mainCard').classList.add('w-glow');
+
+  const pills = buildPills(desc);
+  const clean = desc.replace(/<[^>]*>/g, '').trim();
+  
+// --- DYNAMIC DATE TRANSLATOR CODE ---
+let textFix = clean || "";
+
+if (typeof textFix === 'string' && textFix) {
+    // 1. Dictionary to translate English month names to Indonesian
+    const monthsId = {
+        'January': 'Januari', 'February': 'Februari', 'March': 'Maret',
+        'April': 'April', 'May': 'Mei', 'June': 'Juni',
+        'July': 'Juli', 'August': 'Agustus', 'September': 'September',
+        'October': 'Oktober', 'November': 'November', 'December': 'Desember'
+    };
+    
+    // 2. Array for Indonesian day names
+    const daysId = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+    // 3. Match the date pattern (e.g., "17 May 2026") inside the description text
+    const dateMatch = textFix.match(/(\d{1,2})\s([A-Za-z]+)\s(\d{4})/);
+
+    if (dateMatch) {
+        const fullRawDate = dateMatch[0]; // Captures the exact original text like "17 May 2026"
+        const dayNum = dateMatch[1];     // Day number ("17")
+        const monthEng = dateMatch[2];   // English month name ("May")
+        const yearNum = dateMatch[3];    // Year number ("2026")
+
+        // Translate the month name using the dictionary mapping
+        const monthId = monthsId[monthEng] || monthEng;
+
+        // Automatically calculate the correct day name based on the system calendar
+        const parsedDate = new Date(`${dayNum} ${monthEng} ${yearNum}`);
+        let dayName = "";
+        if (!isNaN(parsedDate.getTime())) {
+            dayName = daysId[parsedDate.getDay()] + ", "; // Dynamically generates "Minggu, ", "Senin, ", etc.
+        }
+
+        // Combine into the new localized format: "Minggu, 17 Mei 2026"
+        const finalIndoDate = `${dayName}${dayNum} ${monthId} ${yearNum}`;
+
+        textFix = textFix.replaceAll(fullRawDate, finalIndoDate);
+    }
+}
+
+
+  const displayTitle = title || 'Peringatan Cuaca';
+
+  document.getElementById('dc').innerHTML = `
+    ${pills}
+    <span class="warn-label">⚠ Peringatan Dini Aktif</span>
+    <div class="warn-title" style="color:#ff453a;">${displayTitle}</div>
+    <div class="desc-text desc-scroll">${textFix}</div>
+
+    <div class="map-section">
+        <div class="map-label">
+          Infografis Wilayah Terdampak
+          <span class="map-zoom-btn" onclick="openZoom('${infUrl}')" title="Perbesar peta">
+            ⛶ Perbesar
+          </span>
+        </div>
+        <div class="map-container" onclick="openZoom('${infUrl}')">
+          <img src="${infUrl}" alt="Infografis Cuaca Kepri" loading="lazy" onerror="this.parentElement.outerHTML=mapErrorHTML()" />
+          <div class="map-overlay"></div>
+        </div>
+     </div>
+
+      <a href="${escHtml(link)}" target="_blank" rel="noopener" class="cta-btn primary">
+        <span>🗺</span> Lihat Peta Radar
+      </a>
+      <a href="https://nowcasting.bmkg.go.id" target="_blank" rel="noopener" class="cta-btn ghost">
+        📡 Buka Nowcasting Real-Time
+      </a>
+
+      <div class="info-row">
+        <div class="info-dot" style="background:var(--red);box-shadow:0 0 6px var(--red);"></div>
+        Diterbitkan: ${translateDate(lastBuild)}
+      </div>
+  `;
+}
+
+function renderSafe(lastBuild) {
+  setStatus('standby', 'STANDBY');
+  document.getElementById('refreshChipText').textContent = `DIPERBARUI ${nowHHMM()} WIB`;
+  
+  const infUrl  = buildInfografisUrl();
+  infografisUrl = infUrl;
+  zoomImgUrl    = infUrl;
+    
+  document.getElementById('mainCard').classList.remove('w-glow');
+
+  document.getElementById('dc').innerHTML = `
+    <div class="pills-row"> 
+      ${pill('p-info', '📡 Citra Satelit')}
+      ${pill('p-safe', '✅ Kondisi Aman')}
+    </div> 
+    <span class="warn-label">Status Wilayah</span> 
+    <div class="warn-title" style="color:var(--accent);">Kepri Kondusif</div> 
+    <div class="desc-text">Tidak ada terdeteksi peringatan dini cuaca ekstrim untuk wilayah Kepulauan Riau saat ini. Kondisi awan terpantau aman &amp; stabil di citra satelit.</div> 
+    
+    <div class="map-section">
+        <div class="map-label">
+          Infografis Citra Wilayah Kepri
+          <span class="map-zoom-btn" onclick="openZoom('${infUrl}')" title="Perbesar peta">
+            ⛶ Perbesar
+          </span>
+        </div>
+        <div class="map-container" onclick="openZoom('${infUrl}')">
+          <img src="${infUrl}" alt="Infografis Cuaca Kepri" loading="lazy" onerror="this.parentElement.outerHTML=mapErrorHTML()" />
+          <div class="map-overlay"></div>
+        </div>
+      </div>
+
+      <a href="https://nowcasting.bmkg.go.id" target="_blank" rel="noopener" class="cta-btn primary">
+        <span>📡</span> Buka Radar Real-Time
+      </a>
+
+      <div class="info-row">
+        <div class="info-dot"></div>
+        ${lastBuild ? 'Diterbitkan: ' + translateDate(lastBuild) : 'SISTEM MONITORING AKTIF'}
+      </div>
+  `;
+}
+
+function renderError() {
+  setStatus('error', 'Koneksi Bermasalah');
+  document.getElementById('refreshChipText').textContent = 'KONEKSI GAGAL';
+  document.getElementById('mainCard').classList.remove('w-glow');
+
+  document.getElementById('dc').innerHTML = `
+    <span class="warn-label">Status Koneksi</span>
+    <div class="warn-title" style="color:#ff453a;">✕ Gagal Memuat Data</div>
+    <div class="desc-text">Tidak dapat menjangkau server BMKG saat ini. Periksa koneksi internet Anda, lalu coba lagi.</div>
+    <div class="btn-row">
+      <button onclick="location.reload()" class="cta-btn btn-error" data-cta="1">
+        <span>↺</span><span>Coba Lagi</span>
+      </button>
+    </div>
+    <div class="div-line"></div>
+    <div class="meta-info">
+      <span class="hi">  STATUS  </span><br/>
+      Gagal memuat data · Coba lagi beberapa saat
+    </div>
+  `;
+}
+
+function mapErrorHTML() {
+    return `<div class="map-error-state">
+      <span style="font-size:28px;">🌐</span>
+      <span>Infografis belum tersedia hari ini</span>
+      <span style="font-size:9px;opacity:0.5;">Coba lagi nanti atau buka radar real-time</span>
+    </div>`;
+  }
+
+  /* Make mapErrorHTML globally accessible from inline onerror */
+  window.mapErrorHTML = mapErrorHTML;
+  window.openZoom     = openZoom;
+  window.closeZoom    = closeZoom;
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+/* ─────────────────────────────────────────────────────────
+     ZOOM MODAL
+  ───────────────────────────────────────────────────────── */
+  function openZoom(url) {
+    const modal = document.getElementById('zoomModal');
+    document.getElementById('zoomImg').src = url || '';
+    modal.classList.add('active');
+  }
+  function closeZoom() {
+    document.getElementById('zoomModal').classList.remove('active');
+  }
+  document.getElementById('zoomModal').addEventListener('click', function(e) {
+    if (e.target === this) closeZoom();
+  });
+
+/* ─────────────────────────────────────────────────────────
+     EASTER EGG — iOS 26 Liquid Glass Burst
+  ───────────────────────────────────────────────────────── */
+  function triggerLiquidGlass(el) {
+    const burst  = document.getElementById('lgBurst');
+    const rect   = el.getBoundingClientRect();
+    const cx     = rect.left + rect.width / 2;
+    const cy     = rect.top  + rect.height / 2;
+
+    burst.innerHTML = '';
+
+    // Flash
+    const flash = document.createElement('div');
+    flash.className = 'lg-flash';
+    flash.style.setProperty('--fx', cx + 'px');
+    flash.style.setProperty('--fy', cy + 'px');
+    burst.appendChild(flash);
+
+    // Rings
+    [80, 140, 220].forEach((size, i) => {
+      const ring = document.createElement('div');
+      ring.className = 'lg-ring';
+      ring.style.cssText = `
+        width:${size}px;height:${size}px;
+        left:${cx}px;top:${cy}px;
+        transform-origin:0 0;
+        animation-delay:${i * 0.08}s;
+        border-color: ${i===0?'rgba(0,229,255,0.8)':i===1?'rgba(0,180,255,0.5)':'rgba(0,120,255,0.3)'};
+      `;
+      burst.appendChild(ring);
+    });
+
+    // Blob
+    const blob = document.createElement('div');
+    blob.className = 'lg-blob';
+    blob.style.cssText = `width:100px;height:100px;left:${cx}px;top:${cy}px;transform-origin:0 0;`;
+    burst.appendChild(blob);
+
+    // Sparkles
+    const angles = [0,45,90,135,180,225,270,315];
+    angles.forEach(angle => {
+      const sp = document.createElement('div');
+      sp.className = 'lg-sparkle';
+      const rad = (angle * Math.PI) / 180;
+      const dist = 80 + Math.random() * 60;
+      const tx = Math.cos(rad) * dist;
+      const ty = Math.sin(rad) * dist;
+      sp.style.cssText = `
+        left:${cx}px;top:${cy}px;
+        --tx:translate(${tx}px,${ty}px);
+        animation-delay:${Math.random()*0.15}s;
+        animation-duration:${0.6+Math.random()*0.4}s;
+        background:${Math.random()>0.5?'var(--accent)':'#fff'};
+        box-shadow:0 0 ${6+Math.floor(Math.random()*8)}px var(--accent);
+      `;
+      burst.appendChild(sp);
+    });
+
+    // Ripple on button
+    addRipple(el, rect, cx, cy);
+
+    setTimeout(() => { burst.innerHTML = ''; }, 1400);
+  }
+
+  function addRipple(el, rect, cx, cy) {
+    const r = document.createElement('div');
+    r.className = 'ripple';
+    r.style.left = (cx - rect.left - 5) + 'px';
+    r.style.top  = (cy - rect.top  - 5) + 'px';
+    el.style.position = 'relative';
+    el.style.overflow = 'hidden';
+    el.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+  }
+
+  // Attach easter egg to ALL future .cta-btn clicks
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.cta-btn');
+    if (btn) {
+      triggerLiquidGlass(btn);
+    }
+  });
+
+/* ══════════════════════════════════════════
+   FETCH, PARSE + PROXY CHAIN
+══════════════════════════════════════════ */
+async function initSync(attempt) {
+  attempt = attempt || 0;
+  if (attempt === 0) renderLoading();
+  if (attempt >= PROXIES.length) { renderError(); return; }
+
+  const proxy  = PROXIES[attempt];
+  const target = proxy.raw ? proxy.url : proxy.url + encodeURIComponent(RSS);
+
+  try {
+    const res = await fetchWithTimeout(target, FETCH_TIMEOUT_MS);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    let xml = '';
+    if (proxy.json) {
+      const j = await res.json();
+      xml = (j && j.contents) ? j.contents : '';
+    } else {
+      xml = await res.text();
+    }
+
+    if (!xml || xml.trim().length < 80) throw new Error('empty response');
+
+    const doc   = new DOMParser().parseFromString(xml, 'text/xml');
+    const parseErr = doc.querySelector('parsererror');
+    if (parseErr) throw new Error('XML parse error');
+    const lastBuild = doc.querySelector('lastBuildDate')?.textContent?.trim() || '';
+    const items = doc.querySelectorAll('item');
+    let found   = null;
+
+    items.forEach(function(item) {
+      const titleEl = item.querySelector('title');
+      if (!titleEl) return;
+      const t = titleEl.textContent || '';
+      if (t.includes('Kep. Riau') && !found) {
+        const descEl = item.querySelector('description');
+        const linkEl = item.querySelector('link');
+        found = {
+          title: t.trim(),
+          desc:  descEl ? (descEl.textContent || '') : '',
+          link:  linkEl ? (linkEl.textContent  || '#') : '#'
+        };
+      }
+    });
+
+    if (found) {
+      renderWarning(found.title, found.desc, found.link, lastBuild);
+    } else {
+      renderSafe(lastBuild);
+    }
+
+  } catch (err) {
+    console.warn(`Proxy ${attempt} gagal:`, err.message);
+    initSync(attempt + 1);
+  }
+}
+
+// --- LIQUID GLASS MODAL CONTROLLER INTERACTION ---
+// Function to handle the opening and closing of the credit acknowledgement modal.
+
+// Capture essential elements from the DOM
+const glassModal = document.getElementById("thankyou-modal");
+const openModalTrigger = document.getElementById("trigger-credit-modal");
+const closeModalTrigger = document.getElementById("close-credit-modal");
+
+// Event Listener: Open the modal on footer activation
+// Triggers the modal's display when the designated footer area is clicked.
+openModalTrigger.addEventListener("click", function() {
+    glassModal.style.display = "block";
+});
+
+// Event Listener: Close the modal smoothly via cross click
+// Allows the user to dismiss the modal by clicking the (X) button.
+closeModalTrigger.addEventListener("click", function() {
+    glassModal.style.display = "none";
+});
+
+// Event Listener: Close modal instantly if user hits the ambient blurred space outside the card
+// Provides an alternative dismissal method by clicking the blurred area outside the content box.
+window.addEventListener("click", function(event) {
+    if (event.target === glassModal) {
+        glassModal.style.display = "none";
+    }
+});
+
+// --- INTERACTIVE MAPS MENU CONTROLLER ---
+
+const mapsModal = document.getElementById("maps-selector-modal");
+const openMapsBtn = document.getElementById("trigger-maps-menu");
+const closeMapsBtn = document.getElementById("close-maps-menu");
+
+// Event: Open maps menu (Switching from 'block' to 'flex' layout activation)
+openMapsBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+    mapsModal.style.display = "flex"; 
+});
+
+// Event: Dismiss sheet via close button activation
+closeMapsBtn.addEventListener("click", function() {
+    mapsModal.style.display = "none";
+});
+
+// Event: Close sheet if user triggers the ambient blur space outside the modal box
+window.addEventListener("click", function(event) {
+    if (event.target === mapsModal) {
+        mapsModal.style.display = "none";
+    }
+});
+
+/* ══════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════ */
+initSync(0);
+setInterval(function() { initSync(0); }, 300000);
+      </script>
+    </div>
+  </body>
+</html>
