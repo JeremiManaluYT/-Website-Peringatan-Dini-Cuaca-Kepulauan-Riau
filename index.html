@@ -8,7 +8,7 @@
        GUARD: neutralize Cloudflare "challenge-platform" (cdn-cgi)
        script that some browsers inject when a page is saved from a
        Cloudflare-protected site. On file:// it 404s (ERR_FILE_NOT_FOUND)
-       and spams the console. We block any attempt to load
+       and spams the console. Block any attempt to load
        /cdn-cgi/.../jsd/main.js so the console stays clean and the
        app (map/lightbox) keeps working. Harmless when not present.
        ==================================================================== -->
@@ -1260,7 +1260,7 @@ body.zoom-open {
 }
 
 /* Keeps "Banjir Lokal" + "Jarak Pandang Berkurang" glued side-by-side as one
-   wrapping unit so the row stays symmetric instead of leaving one pill alone. */
+   wrapping unit so the row stays symmetric. */
 .pill-pair {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1271,7 +1271,7 @@ body.zoom-open {
 .wpill {
   display: inline-flex;
   align-items: center;
-  /* Golden-ratio scaled up (×φ ≈ 1.618) so pills are readable, not tiny */
+  /* Golden-ratio scaled up (×φ ≈ 1.618)*/
   gap: 6px;
   font-size: 12.1px;
   font-weight: 700;
@@ -3843,32 +3843,32 @@ body::after {
             Kredit penyedia data
           </h3>
           <p>
-            Data pada situs ini diambil dan diolah dari layanan data & platform resmi sebagai berikut:
+            Data pada situs ini diambil & diolah dari layanan data beserta platform resmi sebagai berikut:
           </p>
           <ul class="credits-list">
             <li>
-              <a href="https://www.bmkg.go.id" target="_blank" class="credit-link"> <strong> BMKG Nowcast API
+              <a href="https://nowcasting.bmkg.go.id/nowcast" target="_blank" class="credit-link"> <strong> BMKG Nowcast API
                 </strong>
-                <span> Sumber data resmi dari pemerintah Indonesia mengenai peringatan dini cuaca dan nowcasting BMKG.
+                <span> Sumber data resmi pemerintah Indonesia untuk peringatan dini cuaca dan nowcasting real-time (0 sampai 6 jam ke depan)
                 </span>
               </a>
             </li>
             <li>
               <a href="https://fonts.google.com" target="_blank" class="credit-link"> <strong> Google Fonts & Icons
                 </strong>
-                <span> Layanan tipografi web dan aset antarmuka dari Google.
+                <span> Layanan tipografi web dan aset antarmuka untuk desain dan pengembangan web dari Google.
                 </span>
               </a>
             </li>
             <li>
               <a href="https://allorigins.win" target="_blank" class="credit-link"> <strong> Public Data Proxies
                 </strong>
-                <span> Layanan proxy sebagai pengambilan data dari berbagai sumber.
+                <span> Layanan proxy CORS gratis untuk mengambil data dari berbagai domain atau situs web langsung melalui kode JavaScript frontend tanpa terhambat batasan keamanan browser.
                 </span>
               </a>
             </li>
           </ul>
-          <p style="font-size: 11px; color: rgba(255, 255, 255, 0.3); margin-top: 22px; text-align: center; margin-bottom: 0; font-weight: 300; letter-spacing: 0.5px;">
+          <p style="font-size: 10px; color: rgba(255, 255, 255, 0.3); margin-top: 22px; text-align: center; margin-bottom: 0; font-weight: 300; letter-spacing: 0.5px;">
             Terima kasih yang sebesar-besarnya kami ucapkan kepada seluruh penyedia data dan aset yang kami gunakan.
           </p>
         </div>
